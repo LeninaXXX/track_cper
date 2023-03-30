@@ -76,4 +76,8 @@ def find_files_with_tags(source_dir, tags):
     
 # The idiomatic way... and only to force full parsing of the file and avoiding NameError exception when doing forward-references to python calls
 if __name__ == '__main__':
+    # sets up a flag
+    with open('./running.bat', 'w') as f:
+        f.write("tskill " + str(os.getpid()))
     main()
+    os.remove('./running.bat')  # remove flag -- successful run
