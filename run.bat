@@ -4,5 +4,3 @@ if exist "./running.bat" (
     del running.bat
 )
 python trackcopy.py
-
-
