@@ -8,7 +8,7 @@ from datetime import datetime
 track_list_dir = './tracks_lists'
 done_track_list_dir = './tracks_lists_processed'
 
-trks_source_dir = './tracks_source'
+trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
 trks_dest_dir = './tracks_dest'
 
 def main():
@@ -25,31 +25,46 @@ def main():
     tracks_lists_files = [fn for fn in tracks_lists_files if os.path.isfile(fn)]
 
     if not tracks_lists_files:
-        print(f'No files listing tracks present in {track_list_dir}\nNothing to do...')
+        print(f'No files listing tracks present in {track_list_dir}')
+        print(f'Nothing to do...')
         exit(0) # This is not an error condition, but the condition in which there's nothing to do
     else:
-        tags = []
-        for f in tracks_lists_files:
-            tags.extend(get_track_tags(f))
-    
-    tags = list(set(tags))  # consider each tag only once -- deduplicate
+        for tracks_list_file in tracks_lists_files:
+            timestamp = datetime.now().isoformat().replace(':', '.')
+            tags = get_track_tags(tracks_list_file)
+            
+            files_to_copy, not_found_tags = find_files_with_tags(trks_source_dirs, tags)
 
-    files_to_copy = find_files_with_tags(trks_source_dir, tags)
+            for nftag in not_found_tags:    # deal with not found tags
+                print(
+                    f'In tracklist file {tracks_list_file}, track tag {nftag} not found',
+                    file=sys.stderr
+                )
+            
+            if files_to_copy:
+                newdir_name = os.path.join(
+                    trks_dest_dir,
+                    os.path.basename(tracks_list_file) + ' - ' + timestamp
+                )
+                os.makedirs(newdir_name, exist_ok=True)
 
-    for track_file in files_to_copy:
-        shutil.copy(track_file, trks_dest_dir)
-    
-    timestamp = datetime.now().isoformat().replace(':', '.')
-    
-    for list_file in tracks_lists_files:
-        shutil.copy(list_file, 
-                    os.path.join(
-                        done_track_list_dir, 
-                        os.path.basename(list_file) + ' ' + timestamp
-                    )
-                   )
-        os.remove(list_file)
-
+                for f in files_to_copy:    # deal with found tags/found files
+                    shutil.copy(f, newdir_name)
+                
+                shutil.copy(tracks_list_file,
+                            os.path.join(
+                                done_track_list_dir,
+                                os.path.basename(tracks_list_file) + ' ' + timestamp
+                            )
+                        )
+                os.remove(tracks_list_file)
+            else:
+                print(
+                    f'From tracklist file {tracks_list_file}, no file was found!!!\n'
+                    f'No directory was created',
+                    file=sys.stderr
+                )
+            
 def get_track_tags(file):
     tags = []
 
@@ -60,19 +75,20 @@ def get_track_tags(file):
 
     return list(set(tags))  # return single instances
 
-def find_files_with_tags(source_dir, tags):
-    files = []
+def find_files_with_tags(source_dirs, tags):
+    found_files = []
+    not_found_tags = tags.copy()
 
-    for dirname, dirnames, filenames in os.walk(source_dir):
-        for file in filenames:
-            for tag in tags:
-                if tag in file:
-                    files.append(os.path.join(dirname, file))
+    for source_dir in source_dirs:
+        for dirname, dirnames, filenames in os.walk(source_dir):
+            for file in filenames:
+                for tag in tags:
+                    if tag in file:
+                        found_files.append(os.path.join(dirname, file))
+                        if tag in not_found_tags:
+                            not_found_tags.remove(tag)
 
-    if len(files) < len(tags): 
-        pass    # placeholder -- inform that some file has not been found
-
-    return files
+    return (found_files, not_found_tags)
     
 # The idiomatic way... and only to force full parsing of the file and avoiding NameError exception when doing forward-references to python calls
 if __name__ == '__main__':
