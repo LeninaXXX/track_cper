@@ -3,7 +3,7 @@ tracks_source/*
 tracks_dest/*
 tracks_lists_processed/*
 tracks_lists/*
-
+logs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
