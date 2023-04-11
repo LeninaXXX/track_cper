@@ -2,6 +2,9 @@ import os
 import shutil
 from datetime import datetime
 
+is_csv = True   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
+sep_char = ',' if is_csv else ';'
+
 track_list_dir = './tracks_lists'
 done_track_list_dir = './tracks_lists_processed'
 
@@ -92,7 +95,7 @@ def get_track_tags(file):
 
     with open(file, encoding='ibm437') as f:
         for line in f.readlines():
-            if line.find(';') not in {0, -1}:
+            if line.find(sep_char) not in {0, -1}:
                 tags.append(line[:line.find(';')].strip())
 
     return list(set(tags))  # return single instances
