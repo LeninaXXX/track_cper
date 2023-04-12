@@ -2,7 +2,7 @@ import os
 import shutil
 from datetime import datetime
 
-is_csv = True   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
+is_csv = False   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
 sep_char = ',' if is_csv else ';'
 
 track_list_dir = './tracks_lists'
@@ -73,7 +73,6 @@ def main():
                                 f'[LOG]     File {f} ----> {newdir_name}',
                                 file=joblog_file
                             )
-
                 else:
                     print(
                         f'[ERR]{datetime.now().isoformat()}',
@@ -95,8 +94,11 @@ def get_track_tags(file):
 
     with open(file, encoding='ibm437') as f:
         for line in f.readlines():
-            if line.find(sep_char) not in {0, -1}:
-                tags.append(line[:line.find(';')].strip())
+            if line.strip() == '' or line.strip()[0] == '/':  
+                continue
+            else:
+                if (tag := line.split(sep_char)[0].strip()) != '':
+                    tags.append(tag)
 
     return list(set(tags))  # return single instances
 
