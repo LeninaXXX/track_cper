@@ -32,11 +32,12 @@ def main():
             print(
                 f'[ERR]{datetime.now().isoformat()}',
                 f'A directory with name {track_list_dir} should exist, where the tracks lists files reside', 
-                file=errlog_file
+                file=errlog_file,
+                flush=True
                 )
             exit(1)
         except:
-            print(f'... something went wrong')
+            print(f'... something went wrong', flush=True)
             exit(1)
 
         tracks_lists_files = [fn for fn in tracks_lists_files if os.path.isfile(fn)]
@@ -56,7 +57,8 @@ def main():
                     print(
                         f'[ERR]{datetime.now().isoformat()}',
                         f'In tracklist file {tracks_list_file}, track tag {nftag} not found',
-                        file=errlog_file
+                        file=errlog_file,
+                        flush=True
                     )
 
                 if files_to_copy:
@@ -70,20 +72,23 @@ def main():
                     with open(joblog_fn, 'a') as joblog_file:
                         print(
                             f'[LOG] For track list file : {tracks_list_file} ...',
-                            file=joblog_file
+                            file=joblog_file,
+                            flush=True
                         )
                         for f in files_to_copy:    # deal with found tags/found files
                             shutil.copy(f, newdir_name)
                             print(
                                 f'[LOG]     File {f} ----> {newdir_name}',
-                                file=joblog_file
+                                file=joblog_file,
+                                flush=True
                             )
                 else:
                     print(
                         f'[ERR]{datetime.now().isoformat()}',
                         f'From tracklist file {tracks_list_file}, no file was found!!!\n'
                         f'     No directory was created corresponding to file {tracks_list_file}',
-                        file=errlog_file
+                        file=errlog_file,
+                        flush=True
                     )
 
                 shutil.copy(tracks_list_file,
