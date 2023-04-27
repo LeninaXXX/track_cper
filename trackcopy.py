@@ -5,11 +5,16 @@ from datetime import datetime
 is_csv = False   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
 sep_char = ',' if is_csv else ';'
 
-track_list_dir = './tracks_lists'
-done_track_list_dir = './tracks_lists_processed'
+# track_list_dir = './tracks_lists'
+# done_track_list_dir = './tracks_lists_processed'
+# 
+# trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
+# trks_dest_dir = './tracks_dest'
 
-trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
-trks_dest_dir = './tracks_dest'
+track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/A Procesar'
+done_track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Procesados'  
+trks_source_dirs = ['C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Musica']  # Admits multiple source directories
+trks_dest_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match'
 
 logs_dir = './logs'
 job_timestamp = datetime.now().isoformat().replace(":", ".")
@@ -104,17 +109,18 @@ def get_track_tags(file):
 
 def find_files_by_tags(source_dirs, tags):
     found_files = []
+    not_found_files = tags.copy()
 
-    for source_dir in source_dirs:
-        for dirname, dirnames, filenames in os.walk(source_dir):
-            for file in filenames:
-                for tag in tags:
+    for tag in tags:
+        for source_dir in source_dirs:
+            for dirname, dirnames, filenames in os.walk(source_dir):
+                for file in filenames:
                     if tag in file:
                         found_files.append(os.path.join(dirname,file))
-                        tags.remove(tag)
+                        not_found_files.remove(tag)
                         break
     
-    return (found_files, tags)
+    return (found_files, not_found_files)
     
 # The idiomatic way... and only to force full parsing of the file and avoiding NameError exception when doing forward-references to python calls
 if __name__ == '__main__':
