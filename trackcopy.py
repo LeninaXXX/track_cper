@@ -7,7 +7,6 @@ sep_char = ',' if is_csv else ';'
 
 # track_list_dir = './tracks_lists'
 # done_track_list_dir = './tracks_lists_processed'
-# 
 # trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
 # trks_dest_dir = './tracks_dest'
 
@@ -122,7 +121,8 @@ def find_files_by_tags(source_dirs, tags):
                 for file in filenames:
                     if tag in file:
                         found_files.append(os.path.join(dirname,file))
-                        not_found_files.remove(tag)
+                        if tag in not_found_files:
+                            not_found_files.remove(tag)
                         break
     
     return (found_files, not_found_files)
