@@ -3,7 +3,7 @@ import shutil
 from datetime import datetime
 
 is_csv = False   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
-sep_char = ',' if is_csv else ';'
+sep_char = ',' if is_csv else ';' # 
 
 # track_list_dir = './tracks_lists'
 # done_track_list_dir = './tracks_lists_processed'
