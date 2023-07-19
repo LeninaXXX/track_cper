@@ -1,19 +1,20 @@
 import os
 import shutil
 from datetime import datetime
+from string import ascii_letters, digits
 
 is_csv = False   # For the new format. Previous format used ; as field separator (and its presence was used to signal valid lines)
 sep_char = ',' if is_csv else ';' # 
 
-# track_list_dir = './tracks_lists'
-# done_track_list_dir = './tracks_lists_processed'
-# trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
-# trks_dest_dir = './tracks_dest'
+track_list_dir = './tracks_lists'
+done_track_list_dir = './tracks_lists_processed'
+trks_source_dirs = ['./tracks_source']  # Admits multiple source directories
+trks_dest_dir = './tracks_dest'
 
-track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/A Procesar'
-done_track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Procesados'  
-trks_source_dirs = ['C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Musica']  # Admits multiple source directories
-trks_dest_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match'
+# track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/A Procesar'
+# done_track_list_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Procesados'  
+# trks_source_dirs = ['C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match/Musica']  # Admits multiple source directories
+# trks_dest_dir = 'C:/Users/ainsua/OneDrive - Radio Mitre/Materiales Match'
 
 logs_dir = './logs'
 job_timestamp = datetime.now().isoformat().replace(":", ".")
@@ -126,11 +127,27 @@ def find_files_by_tags(source_dirs, tags):
                         break
     
     return (found_files, not_found_files)
+
+class XlatUnksToSpaces:
+    chars = ascii_letters + digits
     
+    def __getitem__(self, i):
+        return i if (chr(i) in XlatUnksToSpaces.chars) else ' '
+        
 # The idiomatic way... and only to force full parsing of the file and avoiding NameError exception when doing forward-references to python calls
 if __name__ == '__main__':
+
+    # do what's necessary in order not to need to deal with weird characters in filenames
+    fns_to_normalize = [fn for fn in os.listdir(track_list_dir)]
+    for fn in fns_to_normalize:
+        shutil.move(
+            os.path.join(track_list_dir, fn), 
+            os.path.join(track_list_dir, fn.translate(XlatUnksToSpaces()))
+        )
+
     # sets up a flag
     with open('./running.bat', 'w') as f:
         f.write("tskill " + str(os.getpid()))
+
     main()
     os.remove('./running.bat')  # remove flag -- successful run
